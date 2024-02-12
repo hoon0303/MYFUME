@@ -15,16 +15,16 @@ from sklearn.neighbors import NearestNeighbors
 import timeit
 
 def similar_users(user_id, matrix, k):
-    model_knn = NearestNeighbors(metric = 'correlation', algorithm = 'brute')#피어슨 유사도 계산
-    model_knn.fit(matrix)#모델 학습
+    model_knn = NearestNeighbors(metric = 'correlation', algorithm = 'brute')
+    model_knn.fit(matrix)
 
-    query_index = matrix.index.get_loc(user_id)# 유사도 대상 쿼리 인덱스
+    query_index = matrix.index.get_loc(user_id)# Similar query_index
         
     KN = matrix.iloc[query_index].values.reshape(1, -1)
-    distances, indices = model_knn.kneighbors(KN, n_neighbors = k)#인접한 k개의 sample에 대한 거리 index 반환
+    distances, indices = model_knn.kneighbors(KN, n_neighbors = k)#Top k distances, ,index
 
-    Rec_Users = list()# 유사한 유저 아이디 저장
-    User_dis = list()# 유사한 유저 거리 저장
+    Rec_Users = list()# Similar user indices
+    User_dis = list()# Similar distances
         
     for i in range(1, len(distances.flatten())):# 유사한 사용자 개수만큼 반복
         Rec_Users.append(matrix.index[indices.flatten()[i]])# 유사한 유저 아이디 리스트 저장
