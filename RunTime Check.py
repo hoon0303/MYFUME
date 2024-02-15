@@ -26,11 +26,11 @@ def similar_users(user_id, matrix, k):
     Rec_Users = list()# Similar user indices
     User_dis = list()# Similar distances
         
-    for i in range(1, len(distances.flatten())):# 유사한 사용자 개수만큼 반복
-        Rec_Users.append(matrix.index[indices.flatten()[i]])# 유사한 유저 아이디 리스트 저장
-        User_dis.append(distances.flatten()[i])# 유사한 유저 거리 리스트 저장
+    for i in range(1, len(distances.flatten())):
+        Rec_Users.append(matrix.index[indices.flatten()[i]])
+        User_dis.append(distances.flatten()[i])
 
-    return Rec_Users# 유사한 유저 리스트 반환
+    return Rec_Users# Similar user list
 
 def recommend_item(user_index, similar_user_indices, matrix, items=5):
     
