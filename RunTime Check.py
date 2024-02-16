@@ -34,7 +34,6 @@ def similar_users(user_id, matrix, k):
 
 def recommend_item(user_index, similar_user_indices, matrix, items=5):
     
-    # 유사한 유저 행렬 필터링
     similar_users = matrix[matrix.index.isin(similar_user_indices)]
     
     # 유사 사용자의 정보로 아이템의 평균 예측 점수를 구함
