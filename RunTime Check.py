@@ -36,20 +36,13 @@ def recommend_item(user_index, similar_user_indices, matrix, items=5):
     
     similar_users = matrix[matrix.index.isin(similar_user_indices)]
     
-    # 유사 사용자의 정보로 아이템의 평균 예측 점수를 구함
     similar_users = similar_users.mean(axis=0)
-    # 행렬에서 평균 점수만 저장
     similar_users_df = pd.DataFrame(similar_users, columns=['mean'])
     
-    # 행렬에서 사용자 행렬을 저장
     user_df = matrix[matrix.index == user_index]
-    # 행 열 변환
     user_df_transposed = user_df.transpose()
-    # 열의 이름을 rating으로 설정
     user_df_transposed.columns = ['rating']
-    # 사용자가 평가하지 않은 향수 정보 저장
     user_df_transposed = user_df_transposed[user_df_transposed['rating']==0]
-    # 사용자가 평가하지 않은 향수 인덱스 저장
     Not_rating_list = user_df_transposed.index.tolist()
     
     # 사용자가 평가하지 않은 향수 정보를 필터링
