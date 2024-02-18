@@ -45,25 +45,20 @@ def recommend_item(user_index, similar_user_indices, matrix, items=5):
     user_df_transposed = user_df_transposed[user_df_transposed['rating']==0]
     Not_rating_list = user_df_transposed.index.tolist()
     
-    # 사용자가 평가하지 않은 향수 정보를 필터링
     similar_users_df_filtered = similar_users_df[similar_users_df.index.isin(Not_rating_list)]
-    # 아이템 예측 점수 정렬
     similar_users_df_ordered = similar_users_df_filtered.sort_values(by=['mean'], ascending=False)
-    # 상위 아이템 추출  
     Top_n_perfume = similar_users_df_ordered.head(items)
-    # 추천 아이템 인덱스 리스트 저장
     top_n_anime_indices = Top_n_perfume.index.tolist()
-    # 추천 아이템 향수 데이터의 정보와 합침
     result_item = perfumes[perfumes['N_id'].isin(top_n_anime_indices)]
     
-    return result_item #아이템 추천 리스트
+    return result_item #Item recommendation list
 
-perfumes = pd.read_csv('./data/Perfume_data.csv')# 향수 데이터
-ratings = pd.read_csv('./data/Perfume_review1.csv')# 향수 리뷰 데이터
+perfumes = pd.read_csv('./data/Perfume_data.csv')# perfume
+ratings = pd.read_csv('./data/Perfume_review1.csv')# review
 
-userId = 9570 # 유사 유저 대상 아이디
+userId = 9570 # Target userid
 
-rating_merge = pd.merge(ratings, perfumes,on="N_id")# 향수 리뷰에 향수 정보를 합침
+rating_merge = pd.merge(ratings, perfumes,on="N_id")
 
 # 사용자 향기 평균 테이블을 만듬
 User_category = rating_merge.pivot_table("PerfumeScore", index= "N_User",columns="Smell",aggfunc="mean")# 피봇 테이블 생성
