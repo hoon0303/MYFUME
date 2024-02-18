@@ -60,19 +60,17 @@ userId = 9570 # Target userid
 
 rating_merge = pd.merge(ratings, perfumes,on="N_id")
 
-# 사용자 향기 평균 테이블을 만듬
-User_category = rating_merge.pivot_table("PerfumeScore", index= "N_User",columns="Smell",aggfunc="mean")# 피봇 테이블 생성
-User_category_matrix = User_category.fillna(0)# 평가가 없는 경우 0으로 채움
+User_category = rating_merge.pivot_table("PerfumeScore", index= "N_User",columns="Smell",aggfunc="mean")
+User_category_matrix = User_category.fillna(0)
 
 rating_merge = rating_merge[ rating_merge.Smell == 'Aromatic']
 
 similar_user_indices = similar_users(userId, User_category_matrix,1000)# 향기 평가가 유사한 사용자 10000명 선발
-similar_user_indices.append(userId)# 리스트에 사용자 아이디 추가
+similar_user_indices.append(userId)
 
 Perfume_ratings = ratings[ratings.N_User.isin(similar_user_indices)]# 향수 평가에서 유사 사용자 10000명 필터링
 
 x = 1000
-# 사용자 아이템 평가 테이블을 만듬
 
 start_time = timeit.default_timer() # 시작 시간 체크
 
