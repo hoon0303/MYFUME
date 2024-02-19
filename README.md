@@ -5,7 +5,7 @@
 
 
 ## Demo
-https://my-fume.com
+url: https://my-fume.com
 ### Main Page
 ![f1](https://github.com/hoon0303/MYFUME/assets/53135286/a46b83f7-2f45-436f-afca-1a48aa91d150)
 
