@@ -1,8 +1,8 @@
 ########################################
-# 작성자 : 20164006-박훈
-# 프로그램명 : 최근접 이웃 사용자 추천
-# similar_users : 사용자 유사도 계산 함수
-# recommend_item : 아이템 추천 함수
+# Hoon Park
+# Project : User Recommender
+# similar_users : Similar User Function
+# recommend_item : Item Recommendation Function
 ########################################
 
 import pandas as pd
