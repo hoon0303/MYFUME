@@ -14,7 +14,7 @@ from sklearn.neighbors import NearestNeighbors
 
 def similar(similar_id, matrix, k):
     model_knn = NearestNeighbors(metric = 'correlation', algorithm = 'brute')#피어슨 유사도 계산
-    model_knn.fit(matrix)#모델 학습
+    model_knn.fit(matrix)
 
     query_index = matrix.index.get_loc(similar_id)# 유사도 대상 쿼리 인덱스
         
