@@ -1,13 +1,40 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.metrics import accuracy_score, roc_auc_score, log_loss, precision_score, recall_score, confusion_matrix, roc_curve, precision_recall_curve
-from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
-from deepctr.models import DeepFM
-import tensorflow as tf
+from sklearn.metrics import accuracy_score, roc_auc_score, log_loss, precision_score, recall_score
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, Dataset
+
+class CustomDataset(Dataset):
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, idx):
+        return torch.tensor(self.X.iloc[idx].values, dtype=torch.float32), torch.tensor(self.y.iloc[idx], dtype=torch.float32)
+
+class NeuralNet(nn.Module):
+    def __init__(self, input_dim, dnn_hidden_units):
+        super(NeuralNet, self).__init__()
+        layers = []
+        for i in range(len(dnn_hidden_units)):
+            if i == 0:
+                layers.append(nn.Linear(input_dim, dnn_hidden_units[i]))
+            else:
+                layers.append(nn.Linear(dnn_hidden_units[i-1], dnn_hidden_units[i]))
+            layers.append(nn.ReLU())
+        layers.append(nn.Linear(dnn_hidden_units[-1], 1))
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return torch.sigmoid(self.model(x)).squeeze()
 
 def load_data(item_path, review_path):
     item_data = pd.read_csv(item_path)
@@ -40,72 +67,61 @@ def load_data(item_path, review_path):
 
     return train_data, test_data, sparse_features, dense_features
 
-def prepare_data(train_data, test_data, sparse_features, dense_features, embedding_dim):
-    combined_data = pd.concat([train_data, test_data])
-    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=combined_data[feat].nunique() + 1, embedding_dim=embedding_dim) for feat in sparse_features] + [DenseFeat(feat, 1,) for feat in dense_features]
+def prepare_data(train_data, test_data, batch_size):
+    X_train, y_train = train_data.iloc[:, :-1], train_data.iloc[:, -1]
+    X_test, y_test = test_data.iloc[:, :-1], test_data.iloc[:, -1]
 
-    dnn_feature_columns = fixlen_feature_columns
-    linear_feature_columns = fixlen_feature_columns
+    train_dataset = CustomDataset(X_train, y_train)
+    test_dataset = CustomDataset(X_test, y_test)
 
-    feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    train_input = {name: train_data[name].values for name in feature_names}
-    test_input = {name: test_data[name].values for name in feature_names}
+    return train_loader, test_loader
 
-    return train_input, test_input, linear_feature_columns, dnn_feature_columns
+def train_model(train_loader, input_dim, dnn_hidden_units, epochs, learning_rate):
+    model = NeuralNet(input_dim, dnn_hidden_units)
+    criterion = nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-def train(data, model_input, linear_feature_columns, dnn_feature_columns, batch_size, dnn_hidden_units):
-    model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary', dnn_hidden_units=dnn_hidden_units)
+    for epoch in range(epochs):
+        model.train()
+        for X_batch, y_batch in train_loader:
+            optimizer.zero_grad()
+            outputs = model(X_batch)
+            loss = criterion(outputs, y_batch)
+            loss.backward()
+            optimizer.step()
 
-    metrics = [
-        tf.keras.metrics.BinaryCrossentropy(name='binary_crossentropy'),
-        tf.keras.metrics.AUC(name='auc')
-    ]
+    return model
 
-    class_weight = {0: 1, 1: len(data[data['Target'] == 0]) / len(data[data['Target'] == 1])}
-
-    model.compile("adam", "binary_crossentropy", metrics=metrics)
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_binary_crossentropy', patience=10, restore_best_weights=True)
-    hist = model.fit(model_input, data['Target'].values, batch_size=batch_size, epochs=1000, verbose=1, validation_split=0.2, class_weight=class_weight, callbacks=[early_stopping])
-
-    return model, hist
-
-def evaluate(model, data, test_input, batch_size):
-    pred_ans = model.predict(test_input, batch_size=batch_size)
-
-    y_true = data['Target'].values
-    y_pred = np.where(pred_ans > 0.5, 1, 0)
+def evaluate_model(model, test_loader):
+    model.eval()
+    y_true = []
+    y_pred = []
+    with torch.no_grad():
+        for X_batch, y_batch in test_loader:
+            outputs = model(X_batch)
+            y_true.extend(y_batch.numpy())
+            y_pred.extend(outputs.numpy())
     
-    accuracy = accuracy_score(y_true, y_pred)
-    roc_auc = roc_auc_score(y_true, pred_ans)
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
-    log_loss_value = log_loss(y_true, pred_ans)
+    y_pred_labels = np.where(np.array(y_pred) > 0.5, 1, 0)
+    accuracy = accuracy_score(y_true, y_pred_labels)
+    roc_auc = roc_auc_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred_labels)
+    recall = recall_score(y_true, y_pred_labels)
+    log_loss_value = log_loss(y_true, y_pred)
 
-    return accuracy, roc_auc, precision, recall, log_loss_value, y_true, pred_ans
+    return accuracy, roc_auc, precision, recall, log_loss_value, y_true, y_pred
 
-
-def plot_history(hist):
+def plot_history(history):
     plt.figure(figsize=(12, 6))
-    
-    plt.subplot(1, 2, 1)
-    plt.plot(hist.history['auc'])
-    plt.plot(hist.history['val_auc'])
-    plt.title('Model AUC')
-    plt.xlabel('Epoch')
+    plt.plot(history['auc'], label='Train AUC')
+    plt.plot(history['val_auc'], label='Validation AUC')
+    plt.xlabel('Epochs')
     plt.ylabel('AUC')
-    plt.legend(['Train', 'Validation'], loc='upper left')
-    
-    plt.subplot(1, 2, 2)
-    plt.plot(hist.history['binary_crossentropy'])
-    plt.plot(hist.history['val_binary_crossentropy'])
-    plt.title('Model Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.legend(['Train', 'Validation'], loc='upper left')
-    
+    plt.legend()
     plt.show()
-
 
 item_path = 'data/item.csv'
 review_path = 'data/review.csv'
@@ -114,22 +130,25 @@ train_data, test_data, sparse_features, dense_features = load_data(item_path, re
 embedding_dims = [4, 8]
 batch_sizes = [32, 64, 128, 256]
 dnn_hidden_units_list = [[128, 64], [256, 128], [512, 256]]
+epochs = 100
+learning_rate = 0.001
 
 best_accuracy = 0
 best_roc_auc = 0
 best_log_loss = float('inf')
 best_params = {'embedding_dim': None, 'batch_size': None, 'dnn_hidden_units': None}
 best_model = None
-best_hist = None
+
+input_dim = len(sparse_features + dense_features)
 
 for embedding_dim in embedding_dims:
     for batch_size in batch_sizes:
         for dnn_hidden_units in dnn_hidden_units_list:
             print(f"Training with embedding_dim={embedding_dim}, batch_size={batch_size}, dnn_hidden_units={dnn_hidden_units}")
-            train_input, test_input, train_linear_feature_columns, train_dnn_feature_columns = prepare_data(train_data, test_data, sparse_features, dense_features, embedding_dim)
-            model, hist = train(train_data, train_input, train_linear_feature_columns, train_dnn_feature_columns, batch_size, dnn_hidden_units)
-            accuracy, roc_auc, precision, recall, log_loss_value, y_true, pred_ans = evaluate(model, test_data, test_input, batch_size)
-            
+            train_loader, test_loader = prepare_data(train_data, test_data, batch_size)
+            model = train_model(train_loader, input_dim, dnn_hidden_units, epochs, learning_rate)
+            accuracy, roc_auc, precision, recall, log_loss_value, y_true, y_pred = evaluate_model(model, test_loader)
+
             print(f"Accuracy: {accuracy}, ROC-AUC: {roc_auc}, Log Loss: {log_loss_value}")
 
             if accuracy > best_accuracy and roc_auc > best_roc_auc and log_loss_value < best_log_loss:
@@ -143,11 +162,7 @@ for embedding_dim in embedding_dims:
                 best_params['roc_auc'] = roc_auc
                 best_params['log_loss_value'] = log_loss_value
                 best_model = model
-                best_hist = hist
-                best_y_true = y_true
-                best_pred_ans = pred_ans
 
 print(f"Best parameters: embedding_dim={best_params['embedding_dim']}, batch_size={best_params['batch_size']}, dnn_hidden_units={best_params['dnn_hidden_units']}")
-accuracy, roc_auc, precision, recall, log_loss_value, y_true, pred_ans = evaluate(best_model, test_data, test_input, best_params['batch_size'])
+accuracy, roc_auc, precision, recall, log_loss_value, y_true, y_pred = evaluate_model(best_model, test_loader)
 print(f"Final Evaluation - Accuracy: {accuracy}, ROC-AUC: {roc_auc}, Log Loss: {log_loss_value}")
-plot_history(best_hist)
