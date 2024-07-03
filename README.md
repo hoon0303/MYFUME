@@ -17,7 +17,7 @@ A notable observation from the results is the evident correlation between main c
 
 ## Function
 
-- **Metainformation-Based Analysis**: Utilizes meta-information features to provide accurate perfume recommendations.
-- **Item CF**: Suggests perfumes based on user preferences and meta-information.
-- **User CF**: Recommends users with similar tastes and preferences.
-- **CTR**: Uses DeepFM for Click-Through Rate (CTR) prediction in perfume recommendations.
+- **Metainformation-Based Analysis**: Analyzes perfume characteristics and user preferences using meta-information features.
+- **Item Recommendation CF**: Recommends perfumes similar to the selected ones by considering meta-information features and user experiences.
+- **User Recommendation CF**: Provides personalized recommendations to target users based on meta-information features and user experiences.
+- **Perfume CTR Prediction**: Applies DeepFM, combining the strengths of FM and DNN to capture both low and high-order interactions for predicting Click-Through Rates (CTR) in perfume recommendations.
