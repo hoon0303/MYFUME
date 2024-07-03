@@ -16,7 +16,9 @@ For the validation process, seven primary scent categories of perfumes were inve
 
 A notable observation from the results is the evident correlation between main categories and their respective meta-information. For instance, the Citrus category is predominantly characterized by refreshing fruit aromas. This is corroborated in the scatter plot, where scents akin to Chypre Fruity and Floral Green exhibit attributes common to the Citrus category. In another instance, Aromatic Fougere, characterized by its sharp yet subtly sweet fragrance enriched with woody notes, aligns with the Woody category. These inter-relationships, affirmed via sensory evaluations, help in discerning connections that are often elusive in standard datasets. In essence, these outcomes underline the capability of meta-information features to encapsulate and elucidate latent perfume-specific knowledge effectively.
 
-## Demo
->MYFUME: https://my-fume.com
+## Function
 
-<img src="https://github.com/hoon0303/MYFUME/assets/53135286/a46b83f7-2f45-436f-afca-1a48aa91d150" width="600">
+- **Metainformation-Based Analysis**: Utilizes meta-information features to provide accurate perfume recommendations.
+- **Item CF**: Suggests perfumes based on user preferences and meta-information.
+- **User CF**: Recommends users with similar tastes and preferences.
+- **CTR**: Uses DeepFM for Click-Through Rate (CTR) prediction in perfume recommendations.
