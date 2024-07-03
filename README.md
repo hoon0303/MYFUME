@@ -6,10 +6,9 @@ MYFUME is a personalized perfume recommendation system that leverages meta-infor
 
 >MYFUME: https://my-fume.com
 
-## Analysis and Insights
+## Analysis and Insights of Metainformation Features
 The perfume dataset is utilized for data quality validation, encompassing various classifications of meta-information concerning the scent of perfumes. Verification is conducted by analyzing the distribution of main categories via a scatter plot of clusters.
 
-### Metainformation Features
 <img src="https://github.com/hoon0303/MYFUME/assets/53135286/49f77b13-c4be-4ea1-9831-09018e246e56" width="700">
 
 For the validation process, seven primary scent categories of perfumes were investigated. Each of these categories signifies a distinctive scent attribute of a perfume. The relational proximity among the primary scent categories was determined, dictating the varying color intensities on the scatter plot.
