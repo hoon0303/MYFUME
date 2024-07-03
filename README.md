@@ -7,12 +7,6 @@ MYFUME is a personalized perfume recommendation system that leverages meta-infor
 
 
 ## Demo
-Link: https://my-fume.com
-### Main Page
+>MYFUME: https://my-fume.com
+
 <img src="https://github.com/hoon0303/MYFUME/assets/53135286/a46b83f7-2f45-436f-afca-1a48aa91d150" width="600">
-
-### Item Recommendation
-<img src="https://github.com/hoon0303/MYFUME/assets/53135286/bd9c1772-2ddc-4404-9834-c2f6a05dbc4e" width="600">
-
-### User Recommendation
-<img src="https://github.com/hoon0303/MYFUME/assets/53135286/4e0cdfec-561a-4ac4-bb52-335b57c8e5f7" width="600">
