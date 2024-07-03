@@ -1,6 +1,9 @@
 # Perfume Recommendation ( MYFUME )
 
+<img src="https://github.com/hoon0303/MYFUME/assets/53135286/a46b83f7-2f45-436f-afca-1a48aa91d150" width="600">
+
 MYFUME is a personalized perfume recommendation system that leverages meta-information to extract latent knowledge and provide tailored perfume suggestions. This repository demonstrates the working code for the recommendation algorithms and machine learning models used in MYFUME, with a focus on visualizing and analyzing the extracted meta-information features.
+>MYFUME: https://my-fume.com
 
 ## Analysis and Insights
 The perfume dataset is utilized for data quality validation, encompassing various classifications of meta-information concerning the scent of perfumes. Verification is conducted by analyzing the distribution of main categories via a scatter plot of clusters.
