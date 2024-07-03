@@ -15,9 +15,9 @@ For the validation process, seven primary scent categories of perfumes were inve
 
 A notable observation from the results is the evident correlation between main categories and their respective meta-information. For instance, the Citrus category is predominantly characterized by refreshing fruit aromas. This is corroborated in the scatter plot, where scents akin to Chypre Fruity and Floral Green exhibit attributes common to the Citrus category. In another instance, Aromatic Fougere, characterized by its sharp yet subtly sweet fragrance enriched with woody notes, aligns with the Woody category. These inter-relationships, affirmed via sensory evaluations, help in discerning connections that are often elusive in standard datasets. In essence, these outcomes underline the capability of meta-information features to encapsulate and elucidate latent perfume-specific knowledge effectively.
 
-## Function
+## Features
 
-- **Metainformation-Based Analysis**: Analyzes perfume characteristics and user preferences using meta-information features.
-- **Item Recommendation CF**: Recommends perfumes similar to the selected ones by considering meta-information features and user experiences.
-- **User Recommendation CF**: Provides personalized recommendations to target users based on meta-information features and user experiences.
-- **Perfume CTR Prediction**: Applies DeepFM, combining the strengths of FM and DNN to capture both low and high-order interactions for predicting Click-Through Rates (CTR) in perfume recommendations.
+- **Metainformation-Based Analysis**: Uses meta-information features to analyze the characteristics of perfumes and user preferences.
+- **Item Recommendation CF (Collaborative Filtering)**: Suggests perfumes similar to the ones selected by users by taking into account meta-information features and user experiences.
+- **User Recommendation CF (Collaborative Filtering)**: Provides personalized perfume recommendations to users by analyzing meta-information features and their preferences.
+- **Perfume CTR (Click-Through Rate) Prediction**: Implements DeepFM, which combines the strengths of Factorization Machines (FM) and Deep Neural Networks (DNN), to capture both low and high-order interactions for predicting CTR in perfume recommendations.
