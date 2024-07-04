@@ -21,4 +21,3 @@ A notable observation from the results is the evident correlation between main c
 - **Item Recommendation CF (Collaborative Filtering)**: Suggests perfumes similar to the ones selected by users by taking into account meta-information features and user experiences.
 - **User Recommendation CF (Collaborative Filtering)**: Provides personalized perfume recommendations to users by analyzing meta-information features and their preferences.
 - **Perfume CTR (Click-Through Rate) Prediction**: Implements DeepFM, which combines the strengths of Factorization Machines (FM) and Deep Neural Networks (DNN), to capture both low and high-order interactions for predicting CTR in perfume recommendations.
-
