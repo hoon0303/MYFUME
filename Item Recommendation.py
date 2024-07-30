@@ -42,26 +42,25 @@ print("향수 추천 대상 정보")
 print(temp)
 print()
 
-rating_merge = pd.merge(ratings, perfumes,on="N_id")# 향수 리뷰에 향수 정보를 합침
-perfumeSemll = perfumes[ perfumes.N_id == perfumeId]['Smell'].values[0]# 향수 추천 향기 저장
+rating_merge = pd.merge(ratings, perfumes,on="N_id")
+perfumeSemll = perfumes[ perfumes.N_id == perfumeId]['Smell'].values[0]
 
-# 향의 종류 사용자 평균 테이블을 만듬
-mean_ratings=rating_merge.pivot_table("PerfumeScore", index= "Smell",columns="N_User",aggfunc="mean")# 피봇 테이블 생성
-mean_ratings = mean_ratings.fillna(0)# 평가가 없는 경우 0으로 채움
+mean_ratings=rating_merge.pivot_table("PerfumeScore", index= "Smell",columns="N_User",aggfunc="mean")
+mean_ratings = mean_ratings.fillna(0)
 
-similar_smell_indices = similar(perfumeSemll, mean_ratings,3)# 유사 향기 저장
-similar_smell_indices.append(perfumeSemll)# 리스트에 현재 향기 추가
+similar_smell_indices = similar(perfumeSemll, mean_ratings,3)
+similar_smell_indices.append(perfumeSemll)
 print("###해당 향수와 유사한 향기###")
 print(similar_smell_indices)
 print()
 
-Perfume_ratings = rating_merge[rating_merge.Smell.isin(similar_smell_indices)]# 향수 향기 3개 필터링
+Perfume_ratings = rating_merge[rating_merge.Smell.isin(similar_smell_indices)]
 
-rating_matrix = Perfume_ratings.pivot_table(index='N_id', columns='N_User', values='PerfumeScore')# 피봇 테이블 생성
-rating_matrix = rating_matrix.fillna(0)# 평가가 없는 경우 0으로 채움
+rating_matrix = Perfume_ratings.pivot_table(index='N_id', columns='N_User', values='PerfumeScore')
+rating_matrix = rating_matrix.fillna(0)
 
-similar_Item_indices = similar_user_indices = similar(perfumeId, rating_matrix,9)# 유사 아이템 추천항목 저장
+similar_Item_indices = similar_user_indices = similar(perfumeId, rating_matrix,9)
 
 print("###최종 추천###")
-similar_Item_indices = perfumes[perfumes.N_id.isin(similar_Item_indices)]# 아이템 추천 인덱스와 향수 정보를 합침
-print(similar_Item_indices)# 아이템 추천 결과 출력
+similar_Item_indices = perfumes[perfumes.N_id.isin(similar_Item_indices)]
+print(similar_Item_indices)
