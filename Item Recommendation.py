@@ -1,66 +1,70 @@
-########################################
-# 작성자 : 20164006-박훈
-# 프로그램명 : 최근접 이웃 아이템 추천
-# similar : 유사도 계산 함수
-########################################
-
 import pandas as pd
 import numpy as np
-import csv
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.spatial.distance import correlation
-import operator
 from sklearn.neighbors import NearestNeighbors
 
-def similar(similar_id, matrix, k):
-    model_knn = NearestNeighbors(metric = 'correlation', algorithm = 'brute')#피어슨 유사도 계산
-    model_knn.fit(matrix)
+def calculate_similarity(target_id, data_matrix, num_neighbors):
+    """
+    주어진 아이템에 대해 최근접 이웃을 찾아 유사한 아이템을 반환하는 함수.
 
-    query_index = matrix.index.get_loc(similar_id)# 유사도 대상 쿼리 인덱스
-        
-    KN = matrix.iloc[query_index].values.reshape(1, -1)
-    distances, indices = model_knn.kneighbors(KN, n_neighbors = k)#인접한 k개의 sample에 대한 거리 index 반환
+    Parameters:
+        target_id: 유사도를 계산할 대상의 ID.
+        data_matrix: 유사도 계산에 사용할 데이터 매트릭스.
+        num_neighbors: 반환할 이웃의 수.
 
-    Rec_similar = list()# 유사 아이디 저장
-    similar_dis = list()# 유사 거리 저장
-        
-    for i in range(1, len(distances.flatten())):# 유사 리스트 개수만큼 반복
-        Rec_similar.append(matrix.index[indices.flatten()[i]])# 유사 아이디 리스트 저장
-        similar_dis.append(distances.flatten()[i])# 유사 거리 리스트 저장
+    Returns:
+        list: 유사한 아이템의 ID 리스트.
+    """
+    knn_model = NearestNeighbors(metric='correlation', algorithm='brute')
+    knn_model.fit(data_matrix)
 
-    return Rec_similar# 유사한 리스트 반환
+    query_index = data_matrix.index.get_loc(target_id)  # 대상 쿼리 인덱스
+    query_vector = data_matrix.iloc[query_index].values.reshape(1, -1)
+    
+    distances, indices = knn_model.kneighbors(query_vector, n_neighbors=num_neighbors)
 
-perfumes = pd.read_csv('./data/Perfume_data.csv')# 향수 데이터
-ratings = pd.read_csv('./data/Perfume_review1.csv')# 향수 리뷰 데이터
+    similar_ids = [data_matrix.index[i] for i in indices.flatten()[1:]]
+    return similar_ids
 
-perfumeId = 23535# 향수 아이디
+# 데이터 불러오기
+perfumes_df = pd.read_csv('./data/Perfume_data.csv')  # 향수 데이터
+ratings_df = pd.read_csv('./data/Perfume_review1.csv')  # 향수 리뷰 데이터
 
-print("향수 추천 아이디 : %d"%(perfumeId))
-temp = perfumes[ perfumes.N_id == perfumeId]
-print()
-print("향수 추천 대상 정보")
-print(temp)
-print()
+target_perfume_id = 23535  # 추천할 향수의 ID
 
-rating_merge = pd.merge(ratings, perfumes,on="N_id")
-perfumeSemll = perfumes[ perfumes.N_id == perfumeId]['Smell'].values[0]
-
-mean_ratings=rating_merge.pivot_table("PerfumeScore", index= "Smell",columns="N_User",aggfunc="mean")
-mean_ratings = mean_ratings.fillna(0)
-
-similar_smell_indices = similar(perfumeSemll, mean_ratings,3)
-similar_smell_indices.append(perfumeSemll)
-print("###해당 향수와 유사한 향기###")
-print(similar_smell_indices)
+# 대상 향수 정보 출력
+print(f"향수 추천 대상 ID: {target_perfume_id}")
+target_perfume_info = perfumes_df[perfumes_df.N_id == target_perfume_id]
+print("\n향수 추천 대상 정보")
+print(target_perfume_info)
 print()
 
-Perfume_ratings = rating_merge[rating_merge.Smell.isin(similar_smell_indices)]
+# 평점 데이터와 향수 데이터를 병합
+merged_ratings = pd.merge(ratings_df, perfumes_df, on="N_id")
+target_smell = perfumes_df[perfumes_df.N_id == target_perfume_id]['Smell'].values[0]
 
-rating_matrix = Perfume_ratings.pivot_table(index='N_id', columns='N_User', values='PerfumeScore')
+# 평균 평점 매트릭스 생성
+mean_ratings_matrix = merged_ratings.pivot_table("PerfumeScore", index="Smell", columns="N_User", aggfunc="mean")
+mean_ratings_matrix = mean_ratings_matrix.fillna(0)
+
+# 유사한 향기의 향수 찾기
+similar_smells = calculate_similarity(target_smell, mean_ratings_matrix, 3)
+similar_smells.append(target_smell)
+print("### 해당 향수와 유사한 향기 ###")
+print(similar_smells)
+print()
+
+# 유사한 향기의 향수들의 평점 데이터 필터링
+filtered_ratings = merged_ratings[merged_ratings.Smell.isin(similar_smells)]
+
+# 평점 매트릭스 생성
+rating_matrix = filtered_ratings.pivot_table(index='N_id', columns='N_User', values='PerfumeScore')
 rating_matrix = rating_matrix.fillna(0)
 
-similar_Item_indices = similar_user_indices = similar(perfumeId, rating_matrix,9)
+# 유사한 아이템 추천
+recommended_item_ids = calculate_similarity(target_perfume_id, rating_matrix, 9)
 
-print("###최종 추천###")
-similar_Item_indices = perfumes[perfumes.N_id.isin(similar_Item_indices)]
-print(similar_Item_indices)
+# 최종 추천 결과 출력
+print("### 최종 추천 ###")
+final_recommendations = perfumes_df[perfumes_df.N_id.isin(recommended_item_ids)]
+print(final_recommendations)
